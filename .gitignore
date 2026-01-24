@@ -11,3 +11,6 @@ yarn-error.log
 
 # Optional: OS files
 .DS_Store
+
+npm install dotenv --save
+
