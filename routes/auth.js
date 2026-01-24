@@ -12,8 +12,7 @@ router.post("/test", (req, res) => {
 });
 
 /* -------------------------------------------
-   LOGIN PAGES (STATIC HTML)
-   These pages are inside /public
+   LOGIN & REGISTER PAGES (STATIC HTML)
 ------------------------------------------- */
 
 // Student Login Page
@@ -40,64 +39,77 @@ router.get("/grievance-login", (req, res) => {
    STUDENT LOGIN
 ------------------------------------------- */
 router.post("/login-student", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email, role: "student" });
-  if (!user) return res.send("❌ Student not found");
+    const user = await User.findOne({ email, role: "student" });
+    if (!user) return res.send("❌ Student not found");
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.send("❌ Invalid password");
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.send("❌ Invalid password");
 
-  // Save session
-  req.session.user = {
-    id: user._id.toString(),
-    name: user.name,
-    email: user.email,
-    role: user.role
-  };
+    req.session.user = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      role: user.role
+    };
 
-  res.redirect("/student-dashboard.html");  // from /public
+    res.redirect("/student-dashboard.html");
+  } catch (err) {
+    console.error("STUDENT LOGIN ERROR:", err);
+    res.status(500).send("Login failed");
+  }
 });
 
 /* -------------------------------------------
    ADMIN LOGIN
 ------------------------------------------- */
 router.post("/login-admin", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email, role: "admin" });
-  if (!user) return res.send("❌ Admin not found");
+    const user = await User.findOne({ email, role: "admin" });
+    if (!user) return res.send("❌ Admin not found");
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.send("❌ Invalid password");
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.send("❌ Invalid password");
 
-  req.session.user = user;
+    req.session.user = {
+      id: user._id.toString(),
+      role: user.role
+    };
 
-  res.redirect("/admin/dashboard");
+    res.redirect("/admin/dashboard");
+  } catch (err) {
+    console.error("ADMIN LOGIN ERROR:", err);
+    res.status(500).send("Admin login failed");
+  }
 });
 
 /* -------------------------------------------
-   GRIEVANCE LOGIN
+   GRIEVANCE OFFICER LOGIN
 ------------------------------------------- */
 router.post("/login-grievance", async (req, res) => {
-  console.log("📌 Grievance Login Hit:", req.body);
+  try {
+    const { email, password } = req.body;
 
-  const { email, password } = req.body;
+    const user = await User.findOne({ email, role: "grievance" });
+    if (!user) return res.send("❌ Grievance officer not found");
 
-  const user = await User.findOne({ email, role: "grievance" });
-  if (!user) return res.send("❌ Grievance Officer not found");
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.send("❌ Invalid password");
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.send("❌ Invalid password");
+    req.session.user = {
+      id: user._id.toString(),
+      role: user.role
+    };
 
-  req.session.user = {
-    id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role
-  };
-
-  res.redirect("/grievance/dashboard");
+    res.redirect("/grievance/dashboard");
+  } catch (err) {
+    console.error("GRIEVANCE LOGIN ERROR:", err);
+    res.status(500).send("Grievance login failed");
+  }
 });
 
 /* -------------------------------------------
@@ -105,12 +117,25 @@ router.post("/login-grievance", async (req, res) => {
 ------------------------------------------- */
 router.post("/register", async (req, res) => {
   try {
-    const { name, roll, email, department, password } = req.body;
+    console.log("REGISTER BODY:", req.body);
+
+    const {
+      name,
+      roll,
+      email,
+      department,
+      password,
+      confirm_password
+    } = req.body;
+
+    // Password confirmation
+    if (password !== confirm_password) {
+      return res.send("❌ Passwords do not match");
+    }
 
     const exists = await User.findOne({ email });
     if (exists) return res.send("❌ User already exists");
 
-    // Hash password
     const hashedPass = await bcrypt.hash(password, 10);
 
     const user = new User({
@@ -126,8 +151,11 @@ router.post("/register", async (req, res) => {
 
     res.redirect("/auth/student-login");
   } catch (err) {
-    res.send("❌ Registration error: " + err.message);
+    console.error("REGISTER ERROR:", err);
+    res.status(500).send("Registration failed");
   }
 });
 
 module.exports = router;
+
+
