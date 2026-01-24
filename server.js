@@ -6,6 +6,7 @@ const path = require("path");
 require("dotenv").config();
 
 const app = express();
+app.use(express.static(path.join(__dirname, "public")));
 
 /* ===============================
    1. BODY PARSERS
@@ -68,5 +69,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
+
 
 
