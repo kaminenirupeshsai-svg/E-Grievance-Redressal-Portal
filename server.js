@@ -102,10 +102,8 @@ app.use("/officer", officerRoutes);
 /* ============================================
    🔹 8. START SERVER
 ============================================ */
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running at http://localhost:${PORT}`)
-);
+const PORT = process.env.PORT || 5000;  // fallback for local
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
 
 
