@@ -1,5 +1,5 @@
 {
-  "name": "e-grievance-redressal-portal",
+  "name": "e-grievance-redressal-portal-main",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
