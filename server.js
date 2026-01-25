@@ -35,11 +35,12 @@ app.use(
     secret: process.env.SESSION_SECRET || "super-secret-key",
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
+    store: new MongoStore({
       mongoUrl: process.env.MONGO_URL,
     }),
   })
 );
+
 
 /* ===============================
    5. ROUTES (FIRST!)
@@ -68,6 +69,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
+
 
 
 
