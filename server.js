@@ -41,10 +41,8 @@ app.use(
   })
 );
 
-
-
 /* ===============================
-   5. ROUTES (FIRST!)
+   5. ROUTES
 ================================ */
 app.use("/", require("./routes/pages"));
 app.use("/auth", require("./routes/auth"));
@@ -54,7 +52,7 @@ app.use("/grievance", require("./routes/grievance"));
 app.use("/officer", require("./routes/officer"));
 
 /* ===============================
-   6. STATIC FILES (LAST!)
+   6. STATIC FILES
 ================================ */
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -64,12 +62,23 @@ app.use(express.static(path.join(__dirname, "public")));
 app.get("/health", (req, res) => res.send("✅ Server running"));
 
 /* ===============================
-   8. START SERVER
+   8. GLOBAL ERROR HANDLER
+   Must be after all routes
+================================ */
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send("❌ Server Error: " + err.message);
+});
+
+/* ===============================
+   9. START SERVER
 ================================ */
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+
 
 
 
