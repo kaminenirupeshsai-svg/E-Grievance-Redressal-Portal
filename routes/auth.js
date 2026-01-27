@@ -4,44 +4,31 @@ const path = require("path");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 
-/* -------------------------------------------
-   TEST ROUTE
-------------------------------------------- */
-router.post("/test", (req, res) => {
-  res.send("Grievance Test Route Working");
-});
-
-/* -------------------------------------------
-   LOGIN & REGISTER PAGES (STATIC HTML)
-------------------------------------------- */
-
-// Student Login Page
+/* ------------------------------
+   LOGIN PAGES
+------------------------------ */
 router.get("/student-login", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/student-login.html"));
 });
 
-// Student Register Page
 router.get("/student-register", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/student-register.html"));
 });
 
-// Admin Login Page (EJS)
 router.get("/admin-login", (req, res) => {
   res.render("admin-login");
 });
 
-// Grievance Officer Login Page (EJS)
 router.get("/grievance-login", (req, res) => {
   res.render("grievance-login");
 });
 
-/* -------------------------------------------
+/* ------------------------------
    STUDENT LOGIN
-------------------------------------------- */
+------------------------------ */
 router.post("/login-student", async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email, role: "student" });
     if (!user) return res.send("❌ Student not found");
 
@@ -51,7 +38,6 @@ router.post("/login-student", async (req, res) => {
     req.session.user = {
       id: user._id.toString(),
       name: user.name,
-      email: user.email,
       role: user.role
     };
 
@@ -62,13 +48,14 @@ router.post("/login-student", async (req, res) => {
   }
 });
 
-/* -------------------------------------------
-   ADMIN LOGIN
-------------------------------------------- */
+/* ------------------------------
+   ADMIN LOGIN (FIXED)
+------------------------------ */
 router.post("/login-admin", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // ✅ Only find users with role "admin"
     const user = await User.findOne({ email, role: "admin" });
     if (!user) return res.send("❌ Admin not found");
 
@@ -77,6 +64,7 @@ router.post("/login-admin", async (req, res) => {
 
     req.session.user = {
       id: user._id.toString(),
+      name: user.name, // store name for dashboard display
       role: user.role
     };
 
@@ -87,13 +75,12 @@ router.post("/login-admin", async (req, res) => {
   }
 });
 
-/* -------------------------------------------
+/* ------------------------------
    GRIEVANCE OFFICER LOGIN
-------------------------------------------- */
+------------------------------ */
 router.post("/login-grievance", async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email, role: "grievance" });
     if (!user) return res.send("❌ Grievance officer not found");
 
@@ -102,6 +89,7 @@ router.post("/login-grievance", async (req, res) => {
 
     req.session.user = {
       id: user._id.toString(),
+      name: user.name,
       role: user.role
     };
 
@@ -112,23 +100,13 @@ router.post("/login-grievance", async (req, res) => {
   }
 });
 
-/* -------------------------------------------
+/* ------------------------------
    STUDENT REGISTRATION
-------------------------------------------- */
+------------------------------ */
 router.post("/register", async (req, res) => {
   try {
-    console.log("REGISTER BODY:", req.body);
+    const { name, roll, email, department, password, confirm_password } = req.body;
 
-    const {
-      name,
-      roll,
-      email,
-      department,
-      password,
-      confirm_password
-    } = req.body;
-
-    // Password confirmation
     if (password !== confirm_password) {
       return res.send("❌ Passwords do not match");
     }
@@ -144,7 +122,7 @@ router.post("/register", async (req, res) => {
       email,
       department,
       password: hashedPass,
-      role: "student"
+      role: "student" // always student here
     });
 
     await user.save();
@@ -157,5 +135,7 @@ router.post("/register", async (req, res) => {
 });
 
 module.exports = router;
+
+
 
 
