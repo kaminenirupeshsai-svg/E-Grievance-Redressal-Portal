@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Complaint = require('../models/Complaint');
 
-// middleware: must be logged in
+// Middleware: must be logged in
 function requireLogin(req, res, next) {
   if (!req.session || !req.session.user) {
     return res.redirect('/auth/student-login');
@@ -10,9 +10,8 @@ function requireLogin(req, res, next) {
   return next();
 }
 
-
 // Create complaint
-router.post('/create', requireLogin, async (req, res) => {
+router.post('/create', requireLogin, async (req, res, next) => {
   try {
     const { title, description, category, priority, anonymous } = req.body;
 
@@ -28,12 +27,12 @@ router.post('/create', requireLogin, async (req, res) => {
     res.redirect('/complaint/history');
 
   } catch (err) {
-    res.send("❌ Error: " + err.message);
+    next(err);
   }
 });
 
 // Complaint History Page
-router.get('/history', requireLogin, async (req, res) => {
+router.get('/history', requireLogin, async (req, res, next) => {
   try {
     const complaints = await Complaint.find({
       student: req.session.user.id
@@ -41,12 +40,12 @@ router.get('/history', requireLogin, async (req, res) => {
 
     res.render('history', { complaints });
   } catch (err) {
-    res.send("❌ Error: " + err.message);
+    next(err);
   }
 });
 
 // Delete complaint
-router.get('/delete/:id', requireLogin, async (req, res) => {
+router.get('/delete/:id', requireLogin, async (req, res, next) => {
   try {
     await Complaint.findOneAndDelete({
       _id: req.params.id,
@@ -55,12 +54,12 @@ router.get('/delete/:id', requireLogin, async (req, res) => {
 
     res.redirect('/complaint/history');
   } catch (err) {
-    res.send("❌ Error deleting complaint: " + err.message);
+    next(err);
   }
 });
 
 // Quick Search
-router.post('/quick', requireLogin, async (req, res) => {
+router.post('/quick', requireLogin, async (req, res, next) => {
   try {
     let query = req.body.query?.trim();
 
@@ -78,12 +77,12 @@ router.post('/quick', requireLogin, async (req, res) => {
     res.render('history', { complaints });
 
   } catch (err) {
-    res.send("❌ Quick Search Error: " + err.message);
+    next(err);
   }
 });
 
 // Quick Lodge
-router.post('/quick-lodge', requireLogin, async (req, res) => {
+router.post('/quick-lodge', requireLogin, async (req, res, next) => {
   try {
     const { short } = req.body;
 
@@ -103,12 +102,8 @@ router.post('/quick-lodge', requireLogin, async (req, res) => {
     res.redirect('/complaint/history');
 
   } catch (err) {
-    res.send("❌ Quick Lodge Error: " + err.message);
+    next(err);
   }
 });
 
 module.exports = router;
-
-
-
-
