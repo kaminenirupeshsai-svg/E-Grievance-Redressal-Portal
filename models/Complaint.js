@@ -34,7 +34,7 @@ const ComplaintSchema = new mongoose.Schema({
   remarks: [
     {
       by: { type: String },
-      role: { type: String },     // 'Admin' | 'Officer' | 'System'
+      role: { type: String }, // 'Admin' | 'Officer' | 'System'
       text: { type: String },
       at: { type: Date, default: Date.now }
     }
@@ -42,14 +42,16 @@ const ComplaintSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// AUTO REFERENCE ID
-ComplaintSchema.pre('save', function(next) {
+// ============================
+// AUTO REFERENCE ID (SAFE FIX)
+// ============================
+ComplaintSchema.pre('save', function() {
   if (!this.referenceId) {
     const random = Math.floor(1000 + Math.random() * 9000);
     const short = this.title ? this.title.slice(0, 3).toUpperCase() : 'EG';
     this.referenceId = `EG-${Date.now().toString().slice(-6)}-${random}-${short}`;
   }
-  next();
+  // No need to call next() when using a synchronous pre hook
 });
 
 module.exports = mongoose.model('Complaint', ComplaintSchema);
