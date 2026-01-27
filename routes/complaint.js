@@ -4,9 +4,12 @@ const Complaint = require('../models/Complaint');
 
 // middleware: must be logged in
 function requireLogin(req, res, next) {
-  if (!req.session.user) return res.redirect('/student-login');
-  next();
+  if (!req.session || !req.session.user) {
+    return res.redirect('/auth/student-login');
+  }
+  return next();
 }
+
 
 // Create complaint
 router.post('/create', requireLogin, async (req, res) => {
@@ -105,6 +108,7 @@ router.post('/quick-lodge', requireLogin, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
