@@ -4,9 +4,9 @@ const path = require("path");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 
-/* ------------------------------
+/* ===============================
    LOGIN PAGES
------------------------------- */
+================================ */
 router.get("/student-login", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/student-login.html"));
 });
@@ -23,12 +23,13 @@ router.get("/grievance-login", (req, res) => {
   res.render("grievance-login");
 });
 
-/* ------------------------------
+/* ===============================
    STUDENT LOGIN
------------------------------- */
+================================ */
 router.post("/login-student", async (req, res) => {
   try {
     const { email, password } = req.body;
+
     const user = await User.findOne({ email, role: "student" });
     if (!user) return res.send("❌ Student not found");
 
@@ -43,17 +44,14 @@ router.post("/login-student", async (req, res) => {
 
     res.redirect("/student-dashboard.html");
   } catch (err) {
-    console.error("STUDENT LOGIN ERROR:", err);
+    console.error(err);
     res.status(500).send("Login failed");
   }
 });
 
-/* ------------------------------
-   ADMIN LOGIN (FIXED)
------------------------------- */
-/* ------------------------------
-   ADMIN LOGIN (ADD THIS)
------------------------------- */
+/* ===============================
+   ADMIN LOGIN
+================================ */
 router.post("/login-admin", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -66,23 +64,48 @@ router.post("/login-admin", async (req, res) => {
 
     req.session.user = {
       id: user._id.toString(),
+      name: user.name,
       role: user.role
     };
 
     res.redirect("/admin/dashboard");
   } catch (err) {
-    console.error("ADMIN LOGIN ERROR:", err);
+    console.error(err);
     res.status(500).send("Admin login failed");
   }
 });
 
+/* ===============================
+   🔐 ADMIN SETUP (RUN ONCE)
+================================ */
+router.get("/setup-admin", async (req, res) => {
+  try {
+    const exists = await User.findOne({ role: "admin" });
+    if (exists) return res.send("⚠️ Admin already exists");
 
-/* ------------------------------
-   GRIEVANCE OFFICER LOGIN
------------------------------- */
+    const hashedPassword = await bcrypt.hash("admin123", 10);
+
+    await User.create({
+      name: "Admin",
+      email: "admin@gmail.com",
+      password: hashedPassword,
+      role: "admin"
+    });
+
+    res.send("✅ Admin created successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Admin creation failed");
+  }
+});
+
+/* ===============================
+   GRIEVANCE LOGIN
+================================ */
 router.post("/login-grievance", async (req, res) => {
   try {
     const { email, password } = req.body;
+
     const user = await User.findOne({ email, role: "grievance" });
     if (!user) return res.send("❌ Grievance officer not found");
 
@@ -97,14 +120,14 @@ router.post("/login-grievance", async (req, res) => {
 
     res.redirect("/grievance/dashboard");
   } catch (err) {
-    console.error("GRIEVANCE LOGIN ERROR:", err);
+    console.error(err);
     res.status(500).send("Grievance login failed");
   }
 });
 
-/* ------------------------------
-   STUDENT REGISTRATION
------------------------------- */
+/* ===============================
+   STUDENT REGISTER
+================================ */
 router.post("/register", async (req, res) => {
   try {
     const { name, roll, email, department, password, confirm_password } = req.body;
@@ -118,25 +141,25 @@ router.post("/register", async (req, res) => {
 
     const hashedPass = await bcrypt.hash(password, 10);
 
-    const user = new User({
+    await User.create({
       name,
       roll,
       email,
       department,
       password: hashedPass,
-      role: "student" // always student here
+      role: "student"
     });
-
-    await user.save();
 
     res.redirect("/auth/student-login");
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    console.error(err);
     res.status(500).send("Registration failed");
   }
 });
 
 module.exports = router;
+
+
 
 
 
