@@ -78,26 +78,7 @@ router.post("/login-admin", async (req, res) => {
 /* ===============================
    🔐 ADMIN SETUP (RUN ONCE)
 ================================ */
-router.get("/setup-admin", async (req, res) => {
-  try {
-    const exists = await User.findOne({ role: "admin" });
-    if (exists) return res.send("⚠️ Admin already exists");
 
-    const hashedPassword = await bcrypt.hash("admin123", 10);
-
-    await User.create({
-      name: "Admin",
-      email: "admin@gmail.com",
-      password: hashedPassword,
-      role: "admin"
-    });
-
-    res.send("✅ Admin created successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Admin creation failed");
-  }
-});
 
 /* ===============================
    GRIEVANCE LOGIN
@@ -158,6 +139,7 @@ router.post("/register", async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
