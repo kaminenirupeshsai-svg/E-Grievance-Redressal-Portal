@@ -51,28 +51,20 @@ router.post("/login-student", async (req, res) => {
 /* ------------------------------
    ADMIN LOGIN (FIXED)
 ------------------------------ */
-router.post("/login-admin", async (req, res) => {
-  try {
-    const { email, password } = req.body;
+router.get("/create-admin", async (req, res) => {
+  const bcrypt = require("bcryptjs");
+  const User = require("../models/User");
 
-    // ✅ Only find users with role "admin"
-    const user = await User.findOne({ email, role: "admin" });
-    if (!user) return res.send("❌ Admin not found");
+  const hashed = await bcrypt.hash("admin123", 10);
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.send("❌ Invalid password");
+  await User.create({
+    name: "Admin",
+    email: "admin@gmail.com",
+    password: hashed,
+    role: "admin"
+  });
 
-    req.session.user = {
-      id: user._id.toString(),
-      name: user.name, // store name for dashboard display
-      role: user.role
-    };
-
-    res.redirect("/admin/dashboard");
-  } catch (err) {
-    console.error("ADMIN LOGIN ERROR:", err);
-    res.status(500).send("Admin login failed");
-  }
+  res.send("✅ Admin created");
 });
 
 /* ------------------------------
@@ -135,6 +127,7 @@ router.post("/register", async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
