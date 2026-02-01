@@ -55,6 +55,12 @@ app.use("/officer", require("./routes/officer"));
    6. STATIC FILES
 ================================ */
 app.use(express.static(path.join(__dirname, "public")));
+/* ===============================
+   ROOT ROUTE (REQUIRED FOR RAILWAY)
+================================ */
+app.get("/", (req, res) => {
+  res.send("✅ E-Grievance Redressal Portal is running");
+});
 
 /* ===============================
    7. HEALTH CHECK
@@ -77,6 +83,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
 
 
 
